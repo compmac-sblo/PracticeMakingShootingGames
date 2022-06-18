@@ -1,4 +1,7 @@
 
+//ゲームスピード(ms)
+const GAME_SPEED = 1000/60; //60fps
+
 //画面サイズ
 const SCREEN_W = 180;
 const SCREEN_H = 320;
@@ -20,6 +23,20 @@ let con = can.getContext("2d");
 can.width  = CANVAS_W;
 can.height = CANVAS_H;
 
+//フィールド(仮想画面)
+let vcan = document.createElement("canvas");
+let vcon = vcan.getContext("2d");
+vcan.width  = FIELD_W;
+vcan.height = FIELD_H;
+
+//カメラの座標
+let camera_x = 0;
+let camera_y = 0;
+
+//星の実体
+let star=[];
+
+//整数の乱数を作る
 function rand(min,max) {
     return Math.floor( Math.random()*(max-min+1) )+min;
 }
@@ -38,8 +55,12 @@ class Star //背景の星
 
     draw()
     {
-        con.fillStyle = rand(0,2) != 0 ? "#66f" : "#8af";
-        con.fillRect(this.x>>8,this.y>>8,this.sz,this.sz); //表示のために固定小数点を丸めて整数に
+        let x = this.x>>8; //8bitシフトしてあるので戻す
+        let y = this.y>>8; //8bitシフトしてあるので戻す
+        if ( x<camera_x || x>camera_x+SCREEN_W 
+             || y<camera_y || y>camera_y+SCREEN_H) return; //カメラ外は描画しない
+        vcon.fillStyle = rand(0,2) != 0 ? "#66f" : "#8af";
+        vcon.fillRect(x,y,this.sz,this.sz); //表示のために固定小数点を丸めて整数に
     }
 
     update()
@@ -55,10 +76,31 @@ class Star //背景の星
 
 }
 
-let star=[];
-for(let i=0;i<STAR_MAX;i++) star[i]= new Star();
 
-con.fillStyle="black";
-con.fillRect(0,0,SCREEN_W,SCREEN_H);
 
-for(let i=0;i<STAR_MAX;i++) star[i].draw();
+//ゲーム初期化
+function gameInit(){
+    for(let i=0;i<STAR_MAX;i++) star[i]= new Star();
+    setInterval( gameLoop, GAME_SPEED );
+}
+
+//ゲームループ
+function gameLoop() {
+    //移動の処理
+    for(let i=0;i<STAR_MAX;i++) star[i].update();
+
+    //描画の処理
+    vcon.fillStyle="black";
+    vcon.fillRect(0,0,SCREEN_W,SCREEN_H);
+
+    for(let i=0;i<STAR_MAX;i++) star[i].draw();
+
+    //仮想画面から実際の画面へ複製
+    con.drawImage( vcan, camera_x, camera_y, SCREEN_W, SCREEN_H,
+        0, 0, CANVAS_W, CANVAS_H);
+}
+
+//オンロードでゲーム開始
+window.onload=function () {
+    gameInit();
+}
