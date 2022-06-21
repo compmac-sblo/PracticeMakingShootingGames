@@ -36,6 +36,49 @@ let camera_y = 0;
 //星の実体
 let star=[];
 
+//キーボードの状態
+let key=[];
+
+
+document.onkeydown = function (e) {
+    key[e.code] = true;
+}
+document.onkeyup = function (e) {
+    key[e.code] = false;
+}
+
+
+//自機クラス
+class Jiki{
+    constructor(){
+        this.x = (FIELD_W/2)<<8; //8bitシフトで固定小数点を使用して内部で1/256 pixel化
+        this.y = (FIELD_H/2)<<8; //8bitシフトで固定小数点を使用して内部で1/256 pixel化
+        this.speed = 512; //60fps 2p
+        this.anime = 0;
+    }
+    //自機の移動
+    update(){
+        if(key["ArrowLeft"] && this.x>this.speed){ //FIELDの端より先に行かない
+            this.x -= this.speed;
+            if(this.anime>-8)this.anime--; //4fで
+        } else if(key["ArrowRight"] && this.x<= (FIELD_W<<8)-this.speed){ //FIELDの端より先に行かない
+            this.x += this.speed;
+            if(this.anime<8)this.anime++; //4fで
+        } else{
+            if(this.anime>0)this.anime--; //戻す処理
+            if(this.anime<0)this.anime++;
+        }
+        if(key["ArrowUp"] && this.y>this.speed)this.y -= this.speed; //FIELDの端より先に行かない
+        
+        if(key["ArrowDown"]  && this.y<= (FIELD_H<<8)-this.speed)this.y += this.speed; //FIELDの端より先に行かない
+    }
+    //自機の描画
+    draw(){
+        drawSprite(2 + (this.anime>>2), this.x, this.y); //4で割らずに2bitシフトで少数点を出さない
+    }
+}
+let jiki = new Jiki();
+
 //ファイルの読み込み(読み込みの確認処理が本来は必要)
 let spriteImage = new Image();
 spriteImage.src = "sprite.png";
@@ -128,13 +171,20 @@ function gameLoop() {
     //移動の処理
     for(let i=0;i<STAR_MAX;i++) star[i].update();
 
+    jiki.update();
+
     //描画の処理
     vcon.fillStyle="black";
-    vcon.fillRect(0,0,SCREEN_W,SCREEN_H);
+    vcon.fillRect(camera_x,camera_y,SCREEN_W,SCREEN_H);
 
     for(let i=0;i<STAR_MAX;i++) star[i].draw();
+    jiki.draw();
 
-    drawSprite(2, 100<<8, 100<<8);
+    //自機の範囲 0 ~ FIELD_W
+   //カメラの範囲 0 ~ FIELD_W-SCREEN_W
+
+    camera_x = (jiki.x>>8)/FIELD_W*(FIELD_W-SCREEN_W);
+    camera_y = (jiki.y>>8)/FIELD_H*(FIELD_H-SCREEN_H);
 
     //仮想画面から実際の画面へ複製
     con.drawImage( vcan, camera_x, camera_y, SCREEN_W, SCREEN_H,
