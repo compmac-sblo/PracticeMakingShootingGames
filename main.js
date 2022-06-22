@@ -1,3 +1,9 @@
+//デバッグにフラグ
+const DEBUG = true;
+
+let drawCount = 0;
+let fps = 0;
+let lastTIme = Date.now();
 
 //ゲームスピード(ms)
 const GAME_SPEED = 1000/60; //60fps
@@ -39,25 +45,67 @@ let star=[];
 //キーボードの状態
 let key=[];
 
-
+//キーを押したとき
 document.onkeydown = function (e) {
     key[e.code] = true;
 }
+//キーを離したとき
 document.onkeyup = function (e) {
     key[e.code] = false;
 }
 
+//弾クラス
+class Tama{
+    constructor(x,y,vx,vy){
+        this.sn =  5;
+        this.x  =  x;
+        this.y  =  y;
+        this.vx = vx;
+        this.vy = vy;
+        this.kill = false;
+    }
+
+    update(){
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if( this.x<0 || this.x > FIELD_W<<8 || this.y<0 || this.y > FIELD_H<<8){ //8bitシフトしてあるのを忘れない
+            this.kill = true; //FIELD外に出たら弾消し判定をON
+        } 
+    }
+
+    draw(){
+        drawSprite(this.sn,this.x,this.y);
+    }
+}
+
+let tama = [];
 
 //自機クラス
 class Jiki{
     constructor(){
         this.x = (FIELD_W/2)<<8; //8bitシフトで固定小数点を使用して内部で1/256 pixel化
         this.y = (FIELD_H/2)<<8; //8bitシフトで固定小数点を使用して内部で1/256 pixel化
-        this.speed = 512; //60fps 2p
-        this.anime = 0;
+        this.speed  = 512; //60fps 2p
+        this.anime  = 0;
+        this.reload = 0;
+        this.relo2  = 0;
     }
     //自機の移動
     update(){
+        if(key["Space"] && this.reload===0){
+            tama.push(new Tama(this.x + (4<<8),this.y - (20<<8),  0,-2000));
+            tama.push(new Tama(this.x - (4<<8),this.y - (20<<8),  0,-2000));
+            tama.push(new Tama(this.x + (8<<8),this.y - (20<<8), 80,-2000));
+            tama.push(new Tama(this.x - (8<<8),this.y - (20<<8),-80,-2000));
+            this.reload = 4; //リロード時間を指定
+            if(++this.relo2===4){ //弾の連射間隔を開ける
+                this.reload = 20;
+                this.relo2  =  0;
+            }
+        }
+        if(!key["Space"])this.reload = this.relo2 = 0;
+        if(this.reload>0)this.reload--;
         if(key["ArrowLeft"] && this.x>this.speed){ //FIELDの端より先に行かない
             this.x -= this.speed;
             if(this.anime>-8)this.anime--; //4fで
@@ -95,11 +143,14 @@ class Sprite{
 
 //スプライト
 let sprite = [
-    new Sprite(  0,0,22,42),
-    new Sprite( 23,0,33,42),
-    new Sprite( 57,0,43,42),
-    new Sprite(101,0,33,42),
-    new Sprite(135,0,22,42)
+    new Sprite(  0, 0,22,42), //0 自機 左2
+    new Sprite( 23, 0,33,42), //1 自機 左1
+    new Sprite( 57, 0,43,42), //2 自機 正面
+    new Sprite(101, 0,33,42), //3 自機 右1
+    new Sprite(135, 0,22,42), //4 自機 右2
+
+    new Sprite(  0,50, 3, 7), //5 弾1
+    new Sprite(  4,50, 5, 5)  //6 弾2
 ];
 
 //スプライトを描画
@@ -163,13 +214,17 @@ class Star //背景の星
 //ゲーム初期化
 function gameInit(){
     for(let i=0;i<STAR_MAX;i++) star[i]= new Star();
-    setInterval( gameLoop, GAME_SPEED );
+    setInterval( gameLoop, GAME_SPEED ); //正確性を求めるならrequestAnimationFrmeを使う
 }
 
 //ゲームループ
 function gameLoop() {
     //移動の処理
     for(let i=0;i<STAR_MAX;i++) star[i].update();
+    for(let i=tama.length-1;i>=0;i--){ //配列の途中が消失してズレるから、大きい番号から見ていく
+        tama[i].update();
+        if(tama[i].kill) tama.splice(i,1);
+    }
 
     jiki.update();
 
@@ -178,6 +233,7 @@ function gameLoop() {
     vcon.fillRect(camera_x,camera_y,SCREEN_W,SCREEN_H);
 
     for(let i=0;i<STAR_MAX;i++) star[i].draw();
+    for(let i=0;i<tama.length;i++) tama[i].draw();
     jiki.draw();
 
     //自機の範囲 0 ~ FIELD_W
@@ -189,6 +245,23 @@ function gameLoop() {
     //仮想画面から実際の画面へ複製
     con.drawImage( vcan, camera_x, camera_y, SCREEN_W, SCREEN_H,
         0, 0, CANVAS_W, CANVAS_H);
+
+    //デバッグ
+    if (DEBUG) {
+        drawCount++;
+        if(lastTIme + 1000 <= Date.now()){
+            fps = drawCount;
+            drawCount = 0;
+            lastTIme = Date.now();
+        }
+
+        con.font = "20px 'Impact'";
+        con.fillStyle = "white";
+        con.fillText("FPS:"+ fps, 20, 20);
+        con.fillText("Tama:"+ tama.length, 20, 40);
+
+
+    }
 }
 
 //オンロードでゲーム開始
