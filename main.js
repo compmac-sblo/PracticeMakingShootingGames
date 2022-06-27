@@ -56,6 +56,7 @@ let key=[];
 let teki = [];
 let tama = [];
 let jiki = new Jiki();
+let teta =[];
 
 //teki[0] = new Teki(75, 200<<8, 200<<8, 0, 0);
 
@@ -88,6 +89,7 @@ function drawObj(obj) {
 function updateAll() {
     updateObj(star);
     updateObj(tama);
+    updateObj(teta);
     updateObj(teki);
 
     jiki.update();
@@ -101,6 +103,7 @@ function drawAll() {
     drawObj(star);
     drawObj(tama);
     jiki.draw();
+    drawObj(teta);
     drawObj(teki);
 
 
@@ -130,6 +133,7 @@ function putInfo() {
         con.fillText("FPS:"+ fps, 20, 20);
         con.fillText("Tama:"+ tama.length, 20, 40);
         con.fillText("Teki:"+ teki.length, 20, 60);
+        con.fillText("Teta:"+ teta.length, 20, 80);
 
     }
 }
@@ -138,7 +142,7 @@ function putInfo() {
 function gameLoop() {
 
     //敵の表示テスト
-    if(rand(0,10) === 1)
+    if(rand(0,30) === 1)
     teki.push( new Teki(39, rand(0,FIELD_W)<<8, 0, 0, rand(300,1200)));
 
     //移動の処理
