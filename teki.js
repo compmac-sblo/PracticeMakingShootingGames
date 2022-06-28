@@ -13,6 +13,7 @@ class Teki extends CharaBase {
         super(snum, x, y, vx, vy);
 
         this.flag = false;
+        this.r    = 10;
     }
 
     update(){

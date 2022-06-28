@@ -92,3 +92,11 @@ function rand(min,max) {
     return Math.floor( Math.random()*(max-min+1) )+min;
 }
 
+function checkHit(x1,y1,r1, x2,y2,r2) {
+    //円での当たり判定
+    let a = (x1 - x2)>>8; //pxに直すためシフト
+    let b = (y1 - y2)>>8; //pxに直すためシフト
+    let r = r1 + r2;
+
+    return r*r >= a*a + b*b; //ルートを取るよりこっちが速い
+}

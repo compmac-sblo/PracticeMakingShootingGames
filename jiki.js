@@ -6,10 +6,23 @@
 class Tama extends CharaBase {
     constructor( x, y, vx, vy){
         super(5, x, y, vx, vy);
+        this.r = 4;
     }
 
     update(){
         super.update();
+
+        for (let i = 0; i < teki.length; i++) {
+            if (!teki[i].kill) {
+                if (checkHit(this.x, this.y, this.r,
+                    teki[i].x, teki[i].y, teki[i].r)) {
+                        teki[i].kill = true;
+                        this.kill = true;
+                        break;
+                }
+            }
+            
+        }
     }
 
     draw(){
