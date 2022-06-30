@@ -14,15 +14,17 @@ document.onkeyup = function (e) {
 //キャラクターの基本クラス
 class CharaBase{
     constructor(snum, x,y,vx,vy){
-        this.sn =  snum;
-        this.x  =  x;
-        this.y  =  y;
-        this.vx = vx;
-        this.vy = vy;
-        this.kill = false;
+        this.sn    =  snum;
+        this.x     =  x;
+        this.y     =  y;
+        this.vx    = vx;
+        this.vy    = vy;
+        this.kill  = false;
+        this.count = 0;
     }
 
     update(){
+        this.count++;
         this.x += this.vx;
         this.y += this.vy;
 
@@ -33,6 +35,42 @@ class CharaBase{
 
     draw(){
         drawSprite(this.sn,this.x,this.y);
+    }
+}
+
+//爆発のクラス
+class Expl extends CharaBase {
+    constructor(c,x,y,vx,vy){
+        super(0,x,y,vx,vy);
+        this.timer = c;
+    }
+    update(){
+        if (this.timer) {
+            this.timer--;
+            return;    
+        }
+        super.update();
+        
+    }
+    draw(){
+        if(this.timer)return;
+        this.sn = 16 + (this.count>>2);
+        if(this.sn === 27) {
+            this.kill = true;
+            return;
+        }
+        super.draw();
+    }
+}
+
+//派手な爆発
+function explosion(x,y,vx,vy) {
+    expl.push(new Expl(0,x,y,vx,vy));
+    for (let i = 0; i < 10; i++) {
+        
+        let evx = vx + (rand(-10,10)<<4);
+        let evy = vy + (rand(-10,10)<<4);
+        expl.push(new Expl(i,x,y,evx,evy)); //当たったら爆発
     }
 }
 

@@ -57,6 +57,7 @@ let teki = [];
 let tama = [];
 let jiki = new Jiki();
 let teta =[];
+let expl =[];
 
 //teki[0] = new Teki(75, 200<<8, 200<<8, 0, 0);
 
@@ -91,13 +92,13 @@ function updateAll() {
     updateObj(tama);
     updateObj(teta);
     updateObj(teki);
-
+    updateObj(expl);
     jiki.update();
 }
 
 //描画の処理
 function drawAll() {
-    vcon.fillStyle="black";
+    vcon.fillStyle=(jiki.damage)?"red":"black"; //ダメージがあれば赤く光らせる
     vcon.fillRect(camera_x,camera_y,SCREEN_W,SCREEN_H);
 
     drawObj(star);
@@ -105,6 +106,7 @@ function drawAll() {
     jiki.draw();
     drawObj(teta);
     drawObj(teki);
+    drawObj(expl);
 
 
     //自機の範囲 0 ~ FIELD_W
@@ -134,7 +136,7 @@ function putInfo() {
         con.fillText("Tama:"+ tama.length, 20, 40);
         con.fillText("Teki:"+ teki.length, 20, 60);
         con.fillText("Teta:"+ teta.length, 20, 80);
-
+        con.fillText("Damage:"+ jiki.damage, 20, 100);
     }
 }
 

@@ -5,6 +5,21 @@
 //敵弾クラス
 class Teta extends CharaBase {
 
+    constructor(sn,x,y,vx,vy){
+        super(sn,x,y,vx,vy);
+        this.r = 4;
+
+    }
+    update(){
+        super.update();
+
+        if (!jiki.damage && checkHit(this.x, this.y, this.r,
+            jiki.x, jiki.y, jiki.r)) { //自機の当たり判定
+                this.kill   = true;
+                jiki.damage = 10; 
+        }
+    }
+
 }
 
 //敵クラス
@@ -40,6 +55,12 @@ class Teki extends CharaBase {
             teta.push( new Teta( 15, this.x, this.y, dx, dy));
         }
         if (this.flag && this.vx > -800) this.vy -= 30; //縦方向の逃げる処理
+
+        if (!jiki.damage && checkHit(this.x, this.y, this.r,
+            jiki.x, jiki.y, jiki.r)) { //敵が体当たりしても当たり判定を持たせる
+                this.kill   = true;
+                jiki.damage = 10; 
+        }
         
     }
 
