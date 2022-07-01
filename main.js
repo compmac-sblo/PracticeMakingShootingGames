@@ -144,9 +144,10 @@ function putInfo() {
 function gameLoop() {
 
     //敵の表示テスト
-    if(rand(0,30) === 1)
-    teki.push( new Teki(39, rand(0,FIELD_W)<<8, 0, 0, rand(300,1200)));
-
+    if(rand(0,30) === 1){
+        let r = rand(0,1);
+        teki.push( new Teki(r, rand(0,FIELD_W)<<8, 0, 0, rand(300,1200)));
+    }
     //移動の処理
     updateAll();
 
