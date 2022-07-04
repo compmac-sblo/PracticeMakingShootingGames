@@ -31,6 +31,8 @@ let can = document.getElementById("can");
 let con = can.getContext("2d");
 can.width  = CANVAS_W;
 can.height = CANVAS_H;
+con.font = "20px 'Impact'";
+
 
 //con.mozimageSmoothingEnable    = SMOOTHING;
 //con.webkitimageSmoothingEnable = SMOOTHING;
@@ -45,6 +47,10 @@ vcan.height = FIELD_H;
 //カメラの座標
 let camera_x = 0;
 let camera_y = 0;
+
+//GAME OVERフラグ
+let gameOver = false;
+let score    = 0;
 
 //星の実体
 let star=[];
@@ -93,7 +99,7 @@ function updateAll() {
     updateObj(teta);
     updateObj(teki);
     updateObj(expl);
-    jiki.update();
+    if(!gameOver)jiki.update();
 }
 
 //描画の処理
@@ -103,7 +109,7 @@ function drawAll() {
 
     drawObj(star);
     drawObj(tama);
-    jiki.draw();
+    if(!gameOver)jiki.draw();
     drawObj(teta);
     drawObj(teki);
     drawObj(expl);
@@ -122,6 +128,24 @@ function drawAll() {
 
 //情報の表示
 function putInfo() {
+    con.fillStyle = "white";
+
+
+    //GAME OVER画面
+    if (gameOver) {
+        let s = "GAME OVER";
+        let w = con.measureText(s).width;
+        let x = CANVAS_W/2 - w/2;
+        let y = CANVAS_H/2 - 20;
+        con.fillText(s,x,y);
+        s = "Push 'R' key to restart!";
+        w = con.measureText(s).width;
+        x = CANVAS_W/2 - w/2;
+        y = CANVAS_H/2 - 20+20;
+        con.fillText(s,x,y);
+    }
+
+    //DEBUG画面
     if (DEBUG) {
         drawCount++;
         if(lastTIme + 1000 <= Date.now()){
@@ -130,13 +154,17 @@ function putInfo() {
             lastTIme = Date.now();
         }
 
-        con.font = "20px 'Impact'";
-        con.fillStyle = "white";
+        
         con.fillText("FPS:"+ fps, 20, 20);
         con.fillText("Tama:"+ tama.length, 20, 40);
         con.fillText("Teki:"+ teki.length, 20, 60);
         con.fillText("Teta:"+ teta.length, 20, 80);
-        con.fillText("Damage:"+ jiki.damage, 20, 100);
+        con.fillText("Expl:"+ expl.length, 20, 100);
+        con.fillText("X:"+ (jiki.x>>8), 20, 120);
+        con.fillText("Y:"+ (jiki.y>>8), 20, 140);
+        con.fillText("HP:"+ jiki.hp, 20, 160);
+        con.fillText("SCORE:"+ score, 20, 180);
+
     }
 }
 

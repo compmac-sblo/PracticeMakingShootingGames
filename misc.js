@@ -5,6 +5,13 @@
 //キーを押したとき
 document.onkeydown = function (e) {
     key[e.code] = true;
+    if(gameOver && e.code === "KeyR"){
+        delete jiki;
+        jiki     = new Jiki();
+        gameOver = false;
+        score    = 0;
+        //init関数を作って呼ぶ方が良い
+    }
 }
 //キーを離したとき
 document.onkeyup = function (e) {
@@ -80,7 +87,7 @@ class Star //背景の星
     constructor()
     {
         this.x   = rand(0,FIELD_W)<<8; //下8bitに固定小数点を使用して内部で1/256 pixel化
-        this.y  = rand(0,FIELD_H)<<8; //下8bitに固定小数点を使用して内部で1/256 pixel化
+        this.y   = rand(0,FIELD_H)<<8; //下8bitに固定小数点を使用して内部で1/256 pixel化
         this.vx  = 0;                  //Vector
         this.vy  = rand(30,200);       //Vector
         this.sz  = rand(1,2);

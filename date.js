@@ -2,6 +2,22 @@
 //スプライトデータ類
 //
 
+//敵マスター
+class TekiMaster{
+    constructor(tnum, r, hp, score,){
+        this.tnum  = tnum;
+        this.r     = r;
+        this.hp    = hp;
+        this.score = score;
+    }
+}
+
+let tekiMaster = [
+    new TekiMaster(0, 10, 100, 100), //0,ピンクひよこ
+    new TekiMaster(1, 10, 1, 100), //0,黄色ひよこ
+]
+
+
 //スプライトクラス
 class Sprite{
     constructor(x,y,w,h){

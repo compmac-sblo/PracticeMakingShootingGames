@@ -14,11 +14,15 @@ class Teta extends CharaBase {
     update(){
         super.update();
 
-        if (!jiki.muteki && checkHit(this.x, this.y, this.r,
+        if (!gameOver && !jiki.muteki && checkHit(this.x, this.y, this.r,
             jiki.x, jiki.y, jiki.r)) { //自機の当たり判定
                 this.kill   = true;
-                jiki.damage = 10; 
-                jiki.muteki = 60; 
+                if((jiki.hp -= 30) <= 0){
+                    gameOver = true;
+                } else {
+                    jiki.damage = 10; 
+                    jiki.muteki = 60; 
+                }
         }
         this.sn = 14 + ((this.count>>3)&1);
     }
@@ -29,10 +33,12 @@ class Teta extends CharaBase {
 class Teki extends CharaBase {
     constructor(tnum, x, y, vx, vy){
         super(0, x, y, vx, vy);
-
+        this.tnum = tekiMaster[tnum].tnum;
+        this.r    = tekiMaster[tnum].r;
+        this.hp   = tekiMaster[tnum].hp;
+        this.score= tekiMaster[tnum].score;
         this.flag = false;
-        this.r    = 10;
-        this.tnum = tnum;
+        
     }
 
     update(){
@@ -42,18 +48,15 @@ class Teki extends CharaBase {
         tekiFunc[this.tnum](this);
         
 
-        if (!jiki.muteki && checkHit(this.x, this.y, this.r,
-            jiki.x, jiki.y, jiki.r)) { //敵が体当たりしても当たり判定を持たせる
-                this.kill   = true;
-                jiki.damage = 10;
-                jiki.muteki = 60; 
-        }
+        
         
     }
 
 }
 
+//自機に向けて弾を発射する
 function tekiShot(obj,speed) {
+    if(gameOver)return;
     let an, dx, dy;
     an = Math.atan2(jiki.y-obj.y, jiki.x-obj.x); //ラジアンで弾の角度を求める
 
